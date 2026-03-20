@@ -26,7 +26,7 @@ public class Review {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "service_id", nullable = false)
-    private Service service;
+    private ServiceEntity service;
 
     @NotNull
     @Column(name = "rating", nullable = false)

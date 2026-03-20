@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { login } from "../../service/api/auth.api";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import api from "@/service/api/api";
-import userApi from "@/service/api/user.api";
-import { useAuth } from "@/context/AuthContext";
+
+import { useAuth } from "../../context/AuthContext"
 
 export default function LoginPage() {
   const { refreshUser } = useAuth();

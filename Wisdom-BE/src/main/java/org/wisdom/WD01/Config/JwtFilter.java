@@ -1,5 +1,6 @@
 package org.wisdom.WD01.Config;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -77,7 +78,7 @@ public class JwtFilter extends OncePerRequestFilter {
                             null,
                             userDetails.getAuthorities()
                     );
-
+            System.out.println("Authentication: " + authentication.getAuthorities());
             authentication.setDetails(
                     new WebAuthenticationDetailsSource()
                             .buildDetails(request)

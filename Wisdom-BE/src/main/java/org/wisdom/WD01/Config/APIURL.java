@@ -115,7 +115,6 @@ public class APIURL {
 
     // Các API PUT cho người dùng không đăng nhập
     public static final String[] URL_ANONYMOUS_PUT = {
-            "/api/account/reset-password"
     };
 
     // Các API DELETE cho người dùng không đăng nhập (hiện không có)

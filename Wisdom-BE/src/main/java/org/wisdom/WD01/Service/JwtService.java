@@ -1,33 +1,46 @@
 package org.wisdom.WD01.Service;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 @Service
 public class JwtService {
-
-    // 🔑 Lấy từ application.properties
-    @Value("${jwt.secret}")
-    private String secretKey;
-
     @Value("${jwt.expiration}")
     private long expiration;
 
-    // ================== TẠO TOKEN ==================
+    // 🔑 Lấy từ application.properties
+    @Value("${jwt.secret}")
+    private String secretKey = "wisdom-secret-key-wisdom-secret-key";
+
     public String generateToken(UserDetails userDetails) {
+
+        Map<String, Object> claims = new HashMap<>();
+
+        claims.put("role",
+                userDetails.getAuthorities().iterator().next().getAuthority());
+
         return Jwts.builder()
+                .setClaims(claims)
                 .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    private Key getSignKey() {
+        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
     // ================== LẤY USERNAME ==================

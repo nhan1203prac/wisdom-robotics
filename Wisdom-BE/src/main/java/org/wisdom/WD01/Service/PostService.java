@@ -13,7 +13,7 @@ public interface PostService {
 
 
     PostResponse updatePost(Long postId, PostRequest postRequest, String username);
-    void deletePost(Long postId, String username);
+    void deletePost(Long postId);
     PageResponse<PostResponse> getAllActivePost(Long categoryId, int page, int size);
     PostResponse getPostById(Long postId);
     PostStatResponse toggleFeature(Long postId, String feature);

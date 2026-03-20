@@ -7,12 +7,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Optional;
 
 public class SecurityUtil {
-    public static Optional<Authentication> getAuthentication() {
-        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
+    public static Authentication getAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
     }
 
     public static String getAuthenticatedUsername() {
-        Authentication authentication = getAuthentication().orElse(null);
+        Authentication authentication = getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return null;
         }
@@ -20,7 +20,7 @@ public class SecurityUtil {
     }
 
     public static UserDetails getUserDetails() {
-        Authentication authentication = getAuthentication().orElse(null);
+        Authentication authentication = getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return null;
         }

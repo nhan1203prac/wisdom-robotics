@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import userApi from "@/service/api/user.api";
-import type { UserResponse } from "@/types/user.type";
+import userApi from "../service/api/user.api";
+import type { UserResponse } from "../types/user.type";
 
 type AuthContextType = {
   user: UserResponse | null;

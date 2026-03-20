@@ -27,6 +27,7 @@
     "@tiptap/starter-kit": "^3.20.1",
     "axios": "^1.13.6",
     "framer-motion": "^12.35.1",
+    "lucide-react": "^0.577.0",
     "lowlight": "^3.3.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

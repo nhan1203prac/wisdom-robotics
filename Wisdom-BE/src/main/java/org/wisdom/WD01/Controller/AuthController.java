@@ -1,6 +1,7 @@
 package org.wisdom.WD01.Controller;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,9 +12,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.wisdom.WD01.Dto.*;
 import org.wisdom.WD01.Dto.Request.AuthRequest;
 import org.wisdom.WD01.Dto.Request.RegisterRequest;
 import org.wisdom.WD01.Dto.Request.ResetPasswordRequest;
@@ -24,6 +27,7 @@ import org.wisdom.WD01.Entity.User;
 import org.wisdom.WD01.Exception.AppException;
 import org.wisdom.WD01.Reponsitory.RoleRepository;
 import org.wisdom.WD01.Reponsitory.UserRepository;
+import org.wisdom.WD01.Service.AccountService;
 import org.wisdom.WD01.Service.EmailService;
 import org.wisdom.WD01.Service.JwtService;
 import org.wisdom.WD01.Service.OtpStorageService;
@@ -96,9 +100,8 @@ public class AuthController {
             ResponseCookie jwtCookie = ResponseCookie.from("accessToken", token)
                     .httpOnly(true) // Prevent Javascript access
                     .secure(false) // Only allow when access through https
-                    .path("/")
                     .maxAge(24 * 60 * 60)
-                    .sameSite("Lax")
+                    .sameSite("Strict")
             .build();
 
             // Return success response with the JWT token

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.wisdom.WD01.Dto.Request.PostRequest;
@@ -32,9 +33,7 @@ public class PostServiceImpl implements PostService {
     private final CategoryRepository categoryRepository;
     private final Validation validation;
 
-    /**
-     * Creates a new post for a specific user.
-     */
+    //Creates a new post for a specific user.
     @Override
     @Transactional
     public PostResponse createPost(PostRequest postRequest, String username) {
@@ -44,6 +43,7 @@ public class PostServiceImpl implements PostService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException("User not found"));
 
+        // Get category
         Category category = categoryRepository.getReferenceById(postRequest.getCategoryId());
 
         // Build the Post entity with default settings (enabled, comment/reaction enabled)
@@ -63,9 +63,7 @@ public class PostServiceImpl implements PostService {
         return mapToResponse(post);
     }
 
-    /**
-     * Updates an existing post if the user is the original author.
-     */
+    //Updates an existing post if the user is the original author.
     @Transactional
     @Override
     public PostResponse updatePost(Long postId, PostRequest postRequest, String username) {
@@ -85,25 +83,32 @@ public class PostServiceImpl implements PostService {
         return mapToResponse(post);
     }
 
-    /**
-     * Deletes a post after verifying ownership.
-     */
+    //Deletes a post after verifying ownership.
     @Override
     @Transactional
-    public void deletePost(Long postId, String username) {
+    public void deletePost(Long postId) {
+        // Check and get authentication
+        Authentication auth = SecurityUtil.getAuthentication();
+        // Get username
+        String username = auth.getName();
+
+        // Get post by id
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new AppException("Post not found"));
 
-        if (!post.getAuthor().getUsername().equals(username)) {
+
+        boolean isOwner = post.getAuthor().getUsername().equals(username);
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a->a.getAuthority().equals("ROLE_ADMIN"));
+        // Only owner and admin can delete post
+        if (!isOwner && !isAdmin) {
             throw new AppException("You don't have permission to delete this post");
         }
 
         postRepository.delete(post);
     }
 
-    /**
-     * Retrieves a paginated list of active posts, optionally filtered by category.
-     */
+    //Retrieves a paginated list of active posts, optionally filtered by category.
     @Override
     public PageResponse<PostResponse> getAllActivePost(Long categoryId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -141,9 +146,8 @@ public class PostServiceImpl implements PostService {
         return mapToResponse(post);
     }
 
-    /**
-     * Toggles post visibility, commenting, or reactions.
-     */
+    //Toggles post visibility, commenting, or reactions.
+
     @Override
     @Transactional
     public PostStatResponse toggleFeature(Long postId, String feature) {
@@ -151,9 +155,13 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new AppException("Post not found"));
 
         // Ensure current user is the owner
-        String currentUsername = SecurityUtil.getAuthenticatedUsername();
-        if (!post.getAuthor().getUsername().equals(currentUsername)) {
-            throw new AppException("You don't have permission");
+        Authentication auth = SecurityUtil.getAuthentication();
+        String currentUsername = auth.getName();
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isOwner = post.getAuthor().getUsername().equals(currentUsername);
+        if (!isAdmin && !isOwner) {
+            throw new AppException("You don't have permission to toggle this feature");
         }
 
         // Toggle boolean states based on feature string
@@ -168,9 +176,8 @@ public class PostServiceImpl implements PostService {
         return mapToStatResponse(post);
     }
 
-    /**
-     * Handles Like/Dislike logic. Supports adding, removing, and switching reactions.
-     */
+    // Handles Like/Dislike logic. Supports adding, removing, and switching reactions.
+
     @Override
     public PostStatResponse reactToPost(Long postId, String username, ReactionType type) {
         Post post = findPostEntityById(postId);
@@ -220,9 +227,7 @@ public class PostServiceImpl implements PostService {
         return mapToStatResponse(post);
     }
 
-    /**
-     * Handles star ratings and recalculates the average rating for the post.
-     */
+    // Handles star ratings and recalculates the average rating for the post.
     @Override
     @Transactional
     public PostStatResponse ratePost(Long postId, String username, int stars) {
@@ -266,9 +271,7 @@ public class PostServiceImpl implements PostService {
         return mapToStatResponse(post);
     }
 
-    /**
-     * Maps Post entity to a detailed PostResponse DTO.
-     */
+    // Maps Post entity to a detailed PostResponse DTO.
     private PostResponse mapToResponse(Post post) {
         return PostResponse.builder()
                 .id(post.getId())
@@ -290,9 +293,7 @@ public class PostServiceImpl implements PostService {
                 .build();
     }
 
-    /**
-     * Maps Post entity to a minimal statistical response DTO.
-     */
+    // Maps Post entity to a minimal statistical response DTO.
     private PostStatResponse mapToStatResponse(Post post) {
         return PostStatResponse.builder()
                 .id(post.getId())

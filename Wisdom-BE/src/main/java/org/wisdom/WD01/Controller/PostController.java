@@ -37,8 +37,7 @@ public class PostController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable Long id) {
-        String username = SecurityUtil.getAuthenticatedUsername();
-        postService.deletePost(id, username);
+        postService.deletePost(id);
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "Delete post successful", null)
         );
